@@ -36,6 +36,7 @@ void TapeProcessing::Init() {
 
 void TapeProcessing::Periodic() {
   Process::Periodic();
+  std::cout << "periodic" << std::endl;
 	if (_capture.IsValidFrame()) {
 
     _capture.CopyCaptureMat(_imgProcessing);
@@ -159,6 +160,7 @@ void TapeProcessing::Periodic() {
         cv::rectangle(_imgProcessedTrack, targets[i] + cv::Point2f(-6,-6), targets[i] + cv::Point2f(6,6), blue, 2); //draw small rectangle on target locations
       }
       cv::putText(_imgProcessedTrack, dis.str() + "m, " + ang.str() + "deg", targets[i] + cv::Point2f(-25,25), cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255,0,255)); //text with distance and angle on target
+      std::cout << dis.str() + "m, " + ang.str() + "deg" << std::endl;
     }
   }
 }

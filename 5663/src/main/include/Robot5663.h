@@ -8,6 +8,7 @@
 #include <frc/SpeedControllerGroup.h>
 #include <frc/Compressor.h>
 #include "frc/AnalogInput.h"
+#include "frc/DigitalInput.h"
 #include "frc/I2C.h"
 #include <frc/Timer.h>
 
@@ -54,6 +55,7 @@ class Robot : public frc::TimedRobot {
 
   frc::Compressor *compressor;
   frc::AnalogInput *AI;
+  frc::DigitalInput *DI;
 
   curtinfrc::Toggle lockToggle{};
   bool lockState = true;

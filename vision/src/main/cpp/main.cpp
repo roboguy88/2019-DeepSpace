@@ -1,5 +1,5 @@
 #include "Capture.h"
-// #include "TapeProcessing.h"
+#include "TapeProcessing.h"
 // #include "BallProcessing.h"
 // #include "HatchProcessing.h"
 #include "Display.h"
@@ -32,10 +32,10 @@ int main(int argc, char **argv) {
     ntinst.StartServer();
   }
 
-  Capture sideHatchCapture{"HatchSide", isDesktop ? 0 : 4};
-  Display display{"Side Hatch", sideHatchCapture};
+  Capture tapeCapture{"tape", isDesktop ? 0 : 4};
+  Display display{"tape display", tapeCapture};
 
-  sideHatchCapture.StartThread(30.0);
+  tapeCapture.StartThread(30.0);
   display.StartThread(30.0);
 
   display.JoinThread();
@@ -50,7 +50,13 @@ int main(int argc, char **argv) {
   // #endif
   // // HatchProcessing hatchProcess{captureGamePiece};
   // // BallProcessing ballProcess{capture};
-  // TapeProcessing tapeProcess{capture};
+  TapeProcessing tapeProcess{tapeCapture};
+
+  tapeProcess.Init();
+
+  while (true) {
+    tapeProcess.Periodic();
+  }
   
   // // Display displayBall{ballProcess};
   // // Display displayHatch{"Hatch Tracking", hatchProcess};

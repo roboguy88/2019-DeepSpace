@@ -4,7 +4,7 @@ Hatch::Hatch(int motorID, int eject, int retract, int align, int faceplant, int 
     Flooper = new curtinfrc::TalonSrx(motorID, 1024);
     Flooper->ModifyConfig([](curtinfrc::TalonSrx::Configuration &config) {
         config.slot0.kP = 0.1;
-        config.slot0.kI = 0.0;
+        config.slot0.kI = 0.0001;
         config.slot0.kD = 0.0;
         config.slot0.kF = 0;
 
@@ -12,8 +12,8 @@ Hatch::Hatch(int motorID, int eject, int retract, int align, int faceplant, int 
         config.nominalOutputReverse = 0;
         config.peakOutputForward = 1;
         config.peakOutputReverse = -1;
-        config.motionCruiseVelocity =3000;
-        config.motionAcceleration = 1000;
+        config.motionCruiseVelocity =5000;
+        config.motionAcceleration = 2000;
     });
 
     ejection = new frc::DoubleSolenoid(9,eject, retract);
@@ -34,7 +34,7 @@ void Hatch::downPosition() {
 }
 
 void Hatch::upPosition() {
-    Flooper->Set(curtinfrc::TalonSrx::ControlMode::MotionMagic, -1000);
+    Flooper->Set(curtinfrc::TalonSrx::ControlMode::MotionMagic, -10000);
     targetpos = true;
     
 }

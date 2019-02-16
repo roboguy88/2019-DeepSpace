@@ -3,7 +3,7 @@
 #include <frc/PowerDistributionPanel.h>
 #include <cmath>
 #include "frc/AnalogInput.h"
-
+#include "WPILib.h"
 #include <iostream>
 
 using namespace curtinfrc;
@@ -13,9 +13,11 @@ using hand = frc::XboxController::JoystickHand; // Type alias for hand
 double lastTimestamp;
 
 void Robot::RobotInit() {
+  CameraServer::GetInstance()->StartAutomaticCapture();
   timer = new frc::Timer();
   lastTimestamp = Timer::GetFPGATimestamp();
   AI = new frc::AnalogInput(3);
+  DI = new frc::DigitalInput(0);
   arduino = new I2C(frc::I2C::kOnboard, 8);
   arduino->WriteBulk(&message, 16);
   message = 78;
@@ -52,8 +54,10 @@ void Robot::RobotInit() {
   //Servo *AntiFlooperFlooper = new Servo(1);
 
   //NetworkTable
-  table = nt::NetworkTableInstance::GetDefault().GetTable("TapeTable");
+  table = nt::NetworkTableInstance::GetDefault().GetTable("TapeTracking");
   targetAngle = table->GetEntry("Angle");
+  targetDistance = table->GetEntry("Distance");
+  targetOffset = table->GetEntry("Target");
 
 //  AntiFlooperFlooper->Set(.5);
   //AntiFlooperFlooper->SetAngle(75);
@@ -88,10 +92,12 @@ void Robot::TeleopPeriodic() {
 
 
   if (xbox1->GetBumper(hand::kRightHand)) {
-    // pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
-    // power = driveFunct->TurnAngle(180, dt, pressRBumper);
-    // drivetrain->Set(power, power);
-    // message = 76;
+    pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
+    power = driveFunct->TurnAngle(180, dt, pressRBumper);
+    drivetrain->Set(power, power);
+    message = 76;
+    frc::SmartDashboard::PutNumber("distance to target", targetDistance.GetDouble(0.0));
+
 
   } else if (xbox1->GetBButton()) {
     pressBButton = xbox1->GetBButtonPressed();
@@ -119,9 +125,9 @@ void Robot::TeleopPeriodic() {
   if (xbox2->GetYButton()){
      cargo->setAngle(0);
   } else if (xbox2->GetAButton()){
-     cargo->setAngle(175000);
+     cargo->setAngle(280000);
   } else if (xbox2->GetXButton()) {
-     cargo->setAngle(40000);
+     cargo->setAngle(180000);
   } else {
      cargo->setRotationSpeed(xbox2->GetY(hand::kLeftHand)/2);
    }
@@ -134,18 +140,26 @@ void Robot::TeleopPeriodic() {
   }
   
   //manual hatch
-  if (xbox2->GetY(hand::kRightHand)){
-    hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand));
-  } else {
-    hatch->setRotationSpeed(0);
-  }
+  // if (xbox2->GetY(hand::kRightHand) > 0.01 && DI->Get() == 1){
+  //   hatch->alignmentPiston(true);
+  //   hatch->setRotationSpeed(0);
+  // } else if (xbox2->GetY(hand::kRightHand) > 0.01 && DI->Get() == 0){
+  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand));
+  // } else if (xbox2->GetY(hand::kRightHand) < -0.01 && DI->Get() == 1) {
+  //   hatch->alignmentPiston(false);
+  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand)/5);
+  // } else if (xbox2->GetY(hand::kRightHand) < -0.01 && DI->Get() == 0){
+  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand)/5);
+  // } else {
+  //   hatch->setRotationSpeed(0);
+  // }
 
   //hatch positioning
-  if (xbox2->GetYButton()){
-    hatch->downPosition();
-  } else if(xbox2->GetXButton()){
-      hatch->upPosition();
-  } else {
+  if (xbox2->GetBButton()){
+    hatch->upPosition();
+  } else if (xbox2->GetY(hand::kRightHand)){
+     hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand));
+   }else {
     hatch->setRotationSpeed(0);
   }
 
