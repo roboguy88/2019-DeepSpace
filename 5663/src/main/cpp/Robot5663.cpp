@@ -19,7 +19,7 @@ void Robot::RobotInit() {
   AI = new frc::AnalogInput(3);
   DI = new frc::DigitalInput(0);
   arduino = new I2C(frc::I2C::kOnboard, 8);
-  arduino->WriteBulk(&message, 16);
+ arduino->Transaction(&message, 1, NULL, 0);
   message = 78;
 
   //climber
@@ -65,7 +65,7 @@ void Robot::RobotInit() {
 void Robot::AutonomousInit() {}
 void Robot::AutonomousPeriodic() {
   message = 76;
-  arduino->WriteBulk(&message, 16);
+  arduino->Transaction(&message, 1, NULL, 0);
 }
 
 void Robot::TeleopInit() {
@@ -80,29 +80,24 @@ void Robot::TeleopPeriodic() {
   lastTimer = timer->Get();
   
  //*-*-*-*-*-{ DRIVER }-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- // Tank drive 
-  //Drive Functions
-  // if (xbox1->GetAButton()){
-  //    driveFunct->Forward(10000); // input distance in ticks
-  // }
-  // if (xbox1->GetBButton()){
-  //    driveFunct->TurnNinety();
-  //  }
   frc::SmartDashboard::PutNumber("timer", timer->Get());
 
 
   if (xbox1->GetBumper(hand::kRightHand)) {
     pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
-    power = driveFunct->TurnAngle(180, dt, pressRBumper);
+    power = driveFunct->TurnAngle(90, dt, pressRBumper);
     drivetrain->Set(power, power);
     message = 76;
     frc::SmartDashboard::PutNumber("distance to target", targetDistance.GetDouble(0.0));
-
-
   } else if (xbox1->GetBButton()) {
     pressBButton = xbox1->GetBButtonPressed();
     powers = driveFunct->Forward(1, dt, pressBButton);
     drivetrain->Set(-powers[0], powers[1]);
+  } else if (xbox1->GetBumper(hand::kLeftHand)){
+    pressLBumper = xbox1->GetBumperPressed(hand::kLeftHand);
+    power = driveFunct->TurnAngle(-90, dt, pressLBumper);
+    drivetrain->Set(power, power);
+    message = 76;
   } else {
     message = 78;
     double left_speed = -xbox1->GetY(hand::kLeftHand);

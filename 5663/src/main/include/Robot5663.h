@@ -65,6 +65,7 @@ class Robot : public frc::TimedRobot {
   double lastTimer;
   double power;
   bool pressRBumper;
+  bool pressLBumper;
   bool pressBButton;
   std::vector<double> powers;
   std::shared_ptr<nt::NetworkTable> table;
