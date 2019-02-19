@@ -58,14 +58,27 @@ void Hatch::alignmentPiston(bool extended) {
     else alignment->Set(frc::DoubleSolenoid::kForward);
 }
 
+bool Hatch::isLocked() {
+    return alignment->Get() == frc::DoubleSolenoid::kForward;
+}
+
+double Hatch::encoderIn(){
+   return Flooper->GetEncoderTicks();
+}
+
+double Hatch::velocityIn(){
+    return Flooper->GetSensorVelocity();
+}
+
 void Hatch::zeroEncoder() {
     Flooper->ZeroEncoder();
 }
 
 void Hatch::update() {
     frc::SmartDashboard::PutNumber("Hatch encoder", Flooper->GetSensorPosition());
+    frc::SmartDashboard::PutNumber("Hatch Velocity", velocityIn());
     frc::SmartDashboard::PutBoolean("Ejector?", ejection->Get());
-    frc::SmartDashboard::PutBoolean("Aligner?", alignment->Get());
+    frc::SmartDashboard::PutBoolean("Aligner?", isLocked());
     frc::SmartDashboard::PutBoolean("target pos", targetpos);
 
     lock->Update(0); // NOTE NEEDS TO BE CHANGED IF PID IS USED

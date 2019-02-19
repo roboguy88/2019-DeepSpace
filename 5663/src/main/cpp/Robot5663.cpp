@@ -105,15 +105,15 @@ void Robot::TeleopPeriodic() {
     drivetrain->Set(left_speed*std::abs(left_speed), right_speed*std::abs(right_speed));
   }
   // Climb
-  if (xbox1->GetBumper(hand::kLeftHand)){
-    BIGBOYS->Set(frc::DoubleSolenoid::kReverse);
-    ClimbLeft->Set(-xbox1->GetY(hand::kRightHand));
-    ClimbRight->Set(xbox1->GetY(hand::kLeftHand));
-  } else {
-    BIGBOYS->Set(frc::DoubleSolenoid::kForward);
-     ClimbLeft->Set(0);
-    ClimbRight->Set(0);
-  }
+  // if (xbox1->GetBumper(hand::kLeftHand)){
+  //   BIGBOYS->Set(frc::DoubleSolenoid::kReverse);
+  //   ClimbLeft->Set(-xbox1->GetY(hand::kRightHand));
+  //   ClimbRight->Set(xbox1->GetY(hand::kLeftHand));
+  // } else {
+  //   BIGBOYS->Set(frc::DoubleSolenoid::kForward);
+  //    ClimbLeft->Set(0);
+  //   ClimbRight->Set(0);
+  // }
   //CoDriver-------------------------------------------------------------------------------
 
   //cargo movement
@@ -133,31 +133,26 @@ void Robot::TeleopPeriodic() {
   } else {
     cargo->setIntakeSpeed(xbox2->GetTriggerAxis(hand::kRightHand)/2);
   }
-  
-  //manual hatch
-  // if (xbox2->GetY(hand::kRightHand) > 0.01 && DI->Get() == 1){
-  //   hatch->alignmentPiston(true);
-  //   hatch->setRotationSpeed(0);
-  // } else if (xbox2->GetY(hand::kRightHand) > 0.01 && DI->Get() == 0){
-  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand));
-  // } else if (xbox2->GetY(hand::kRightHand) < -0.01 && DI->Get() == 1) {
-  //   hatch->alignmentPiston(false);
-  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand)/5);
-  // } else if (xbox2->GetY(hand::kRightHand) < -0.01 && DI->Get() == 0){
-  //   hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand)/5);
-  // } else {
-  //   hatch->setRotationSpeed(0);
-  // }
 
   //hatch positioning
   if (xbox2->GetBButton()){
     hatch->upPosition();
-  } else if (xbox2->GetY(hand::kRightHand)){
+  } else if (xbox2->GetY(hand::kRightHand) < 0){
+    if(DI->Get() == 0) {
      hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand));
-   }else {
+    } else {
+      hatch->setRotationSpeed(0);
+    }
+   } else if (xbox2->GetY(hand::kRightHand) > 0){
+     if (hatch->isLocked() && DI->Get() == 1) {
+       hatch->setRotationSpeed(0);
+     } else {
+    hatch->setRotationSpeed(xbox2->GetY(hand::kRightHand)/4);
+     }
+   } else {
     hatch->setRotationSpeed(0);
   }
-
+                                    
   if (lockToggle.Update(xbox2->GetAButton())) lockState = !lockState;
 
   //Hatch Ejection
@@ -169,6 +164,7 @@ void Robot::TeleopPeriodic() {
   cargo->update();
   driveFunct->update();
   frc::SmartDashboard::PutNumber("PSI", (AI->GetValue()*250/4096-25));
+  frc::SmartDashboard::PutBoolean("Limit Hatch", DI->Get());
   //Update(dt);
 }
 
