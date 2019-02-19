@@ -128,9 +128,7 @@ void Robot::TeleopPeriodic() {
     }
 
     if (stage == 2 && abs(avgOffset) > 10) {
-      double visionPower = driveFunct->TurnAngle(avgOffset * 32/640, dt, snapshots == 0);
-      frc::SmartDashboard::PutNumber("angle", avgOffset * 32/640);
-
+      double visionPower = driveFunct->TurnAngle(avgOffset * 32 / 640, dt, snapshots == 0);
       drivetrain->Set(-visionPower, -visionPower);
       snapshots++;
     } else if (abs(avgOffset) < 10) {
