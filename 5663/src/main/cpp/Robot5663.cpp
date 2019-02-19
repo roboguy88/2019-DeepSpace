@@ -52,10 +52,11 @@ void Robot::RobotInit() {
   //Servo *AntiFlooperFlooper = new Servo(1);
 
   //NetworkTable
-  table = nt::NetworkTableInstance::GetDefault().GetTable("TapeTable");
-  targetAngle = table->GetEntry("Angle");
-  targetDistance = table->GetEntry("Distance");
-  targetOffset = table->GetEntry("Target");
+  visionTable = nt::NetworkTableInstance::GetDefault().GetTable("VisionTracking");
+  tapeTable = visionTable->GetTable("TapeTracking");
+  targetAngle = tapeTable->GetEntry("Angle");
+  targetDistance = tapeTable->GetEntry("Distance");
+  targetOffset = tapeTable->GetEntry("Target");
 
 //  AntiFlooperFlooper->Set(.5);
   //AntiFlooperFlooper->SetAngle(75);

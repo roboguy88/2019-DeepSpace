@@ -65,7 +65,7 @@ class Robot : public frc::TimedRobot {
   bool pressRBumper;
   bool pressBButton;
   std::vector<double> powers;
-  std::shared_ptr<nt::NetworkTable> table;
+  std::shared_ptr<nt::NetworkTable> visionTable, tapeTable, hatchTable;
   nt::NetworkTableEntry targetAngle, targetDistance, targetOffset;
   int stage;
   int snapshots;
