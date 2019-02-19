@@ -4,6 +4,7 @@
 
 #include <frc/RobotController.h>
 #include <algorithm>
+#include <cmath>
 
 using namespace simulation;
 using namespace curtinfrc;
@@ -54,6 +55,7 @@ drivetrain_window::drivetrain_window(DrivetrainConfig *config) : ui::window("Dri
   resetAngle.set_can_activate(false);
   resetAngle.on_click([&](bool, ui::button&) {
     _heading = 0;
+    _gyro_sim->add_angle(-_config->gyro->GetAngle());
   });
 
   switchAlliance.set_can_activate(false);
@@ -67,7 +69,8 @@ drivetrain_window::drivetrain_window(DrivetrainConfig *config) : ui::window("Dri
 
 double drivetrain_window::get_motor_val(bool left) {
   auto &trans = left ? _config->leftDrive.transmission : _config->rightDrive.transmission;
-  return trans->Get() * (trans->GetInverted() ? -1 : 1);
+  auto bat_volt = frc::RobotController::GetInputVoltage();
+  return std::min(bat_volt, std::max(-bat_volt, trans->GetVoltage() * (trans->GetInverted() ? -1 : 1)));
 }
 
 void drivetrain_window::update_encoder(bool left, double pos, double vel) {
@@ -88,8 +91,7 @@ void drivetrain_window::update_encoder(bool left, double pos, double vel) {
 void drivetrain_window::update_physics(double time_delta) {
   for (bool left : {true, false}) {
     wheel_state &state = left ? _wheel_left : _wheel_right;
-    double speed = get_motor_val(left) * (left ? -1 : 1);
-    double voltage = speed * frc::RobotController::GetInputVoltage();
+    double voltage = get_motor_val(left) * (left ? -1 : 1);
 
     physics::DcMotor motor = left ? _config->leftDrive.motor : _config->rightDrive.motor;
     motor = motor.reduce(left ? _config->leftDrive.reduction : _config->rightDrive.reduction);

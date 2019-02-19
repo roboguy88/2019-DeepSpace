@@ -35,11 +35,11 @@ void Robot::RobotInit() {
   // Motor_Controllers
   leftTalon = new TalonSrx(2, 2048);
   leftVictor = new VictorSpx(3);
-  Left = new Gearbox{ new SpeedControllerGroup(*leftTalon, *leftVictor), nullptr };
+  Left = new Gearbox{ new curtinfrc::actuators::MotorVoltageController(new SpeedControllerGroup(*leftTalon, *leftVictor)), nullptr };
 
   rightTalon = new TalonSrx(5, 2048);
   rightVictor = new VictorSpx(4);
-  Right = new Gearbox{ new SpeedControllerGroup(*rightTalon, *rightVictor), nullptr };
+  Right = new Gearbox{ new curtinfrc::actuators::MotorVoltageController(new SpeedControllerGroup(*rightTalon, *rightVictor)), nullptr };
 
   DrivetrainConfig drivetrainConfig{*Left, *Right};
   drivetrain = new Drivetrain(drivetrainConfig);
@@ -54,10 +54,11 @@ void Robot::RobotInit() {
   //Servo *AntiFlooperFlooper = new Servo(1);
 
   //NetworkTable
-  table = nt::NetworkTableInstance::GetDefault().GetTable("TapeTracking");
-  targetAngle = table->GetEntry("Angle");
-  targetDistance = table->GetEntry("Distance");
-  targetOffset = table->GetEntry("Target");
+  visionTable = nt::NetworkTableInstance::GetDefault().GetTable("VisionTracking");
+  tapeTable = visionTable->GetTable("TapeTracking");
+  targetAngle = tapeTable->GetEntry("Angle");
+  targetDistance = tapeTable->GetEntry("Distance");
+  targetOffset = tapeTable->GetEntry("Target");
 
 //  AntiFlooperFlooper->Set(.5);
   //AntiFlooperFlooper->SetAngle(75);
@@ -80,15 +81,59 @@ void Robot::TeleopPeriodic() {
   lastTimer = timer->Get();
   
  //*-*-*-*-*-{ DRIVER }-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-  frc::SmartDashboard::PutNumber("timer", timer->Get());
+ // Tank drive 
+  //Drive Functions
+  // if (xbox1->GetAButton()){
+  //    driveFunct->Forward(10000); // input distance in ticks
+  // }
+  // if (xbox1->GetBButton()){
+  //    driveFunct->TurnNinety();
+  //  }
+  frc::SmartDashboard::PutNumber("target distance", targetDistance.GetDouble(-1.0));
 
 
   if (xbox1->GetBumper(hand::kRightHand)) {
-    pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
-    power = driveFunct->TurnAngle(90, dt, pressRBumper);
-    drivetrain->Set(power, power);
-    message = 76;
-    frc::SmartDashboard::PutNumber("distance to target", targetDistance.GetDouble(0.0));
+    // pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
+    // power = driveFunct->TurnAngle(180, dt, pressRBumper);
+    // drivetrain->Set(power, power);
+    // message = 76;
+
+    if (xbox1->GetBumperPressed(hand::kRightHand)) {
+      stage = 0; //0 = find target, 1 = readjust position, 2 = align on target, 3 = charge target
+      snapshots = 0;
+    }
+
+    if (stage == 0 && targetDistance.GetDouble(-1.0) > 0 && snapshots < 3) {
+      avgDistance += targetDistance.GetDouble;
+      avgAngle += targetAngle.GetDouble;
+      avgOffset += targetOffset.GetDouble;
+      snapshots += 1;
+    } else if (stage = 0 && targetDistance.GetDouble > 0 && snapshots = 3) {
+      avgAngle /= 3;
+      avgDistance /= 3;
+      avgOffset /= 3;
+
+      if (abs(avgAngle) < 25) {
+        stage = 2;
+      } else {
+        stage = 1;
+        snapshots = 0;
+      }
+    }
+
+    if (stage == 2 && abs(avgOffset) > 10) {
+      driveFunct->TurnAngle(avgOffset * 32/640, dt, snapshots == 0);
+      snapshots++;
+    } else if (abs(avgOffset) < 10) {
+      stage = 3;
+      snapshots = 0;
+    }
+
+    if (stage == 3) {
+      driveFunct->Forward(avgDistance, dt, snapshots == 0);
+      snapshots++;
+    }
+
   } else if (xbox1->GetBButton()) {
     pressBButton = xbox1->GetBButtonPressed();
     powers = driveFunct->Forward(1, dt, pressBButton);

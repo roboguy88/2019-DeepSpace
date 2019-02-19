@@ -7,17 +7,16 @@
 #include <frc/DoubleSolenoid.h>
 #include <frc/GenericHID.h>
 
+#include <frc/smartdashboard/SmartDashboard.h>
 #include <networktables/NetworkTableInstance.h>
 
 #include "RobotMap.h"
 #include "strategy/StrategyController.h"
 
-#include "strategy/MPStrategy.h"
 #include "Toggle.h"
 
 #include "Drivetrain.h"
 #include "Lift.h"
-#include "HarvesterIntake.h"
 #include "HatchIntake.h"
 #include "BoxIntake.h"
 
@@ -28,6 +27,8 @@ class Robot : public frc::TimedRobot, protected curtinfrc::StrategyController {
   void RobotInit() override;
   void RobotPeriodic() override;
 
+  void DisabledInit() override;
+
   void AutonomousInit() override;
   void AutonomousPeriodic() override;
 
@@ -37,7 +38,7 @@ class Robot : public frc::TimedRobot, protected curtinfrc::StrategyController {
   void TestInit() override;
   void TestPeriodic() override;
 
-  std::shared_ptr<nt::NetworkTable> table;
+  std::shared_ptr<nt::NetworkTable> visionTable;
   nt::NetworkTableEntry yOffset, xOffset, endAngle;
 
 
@@ -45,9 +46,9 @@ class Robot : public frc::TimedRobot, protected curtinfrc::StrategyController {
 
   curtinfrc::Drivetrain *drivetrain;
 
-  curtinfrc::Toggle toggleFOC;
   bool enableFOC = false;
   std::shared_ptr<DrivetrainFOCStrategy> stratFOC;
+  std::shared_ptr<DrivetrainAngleStrategy> stratPOV;
 
 
   HatchIntake *sideHatchIntake, *frontHatchIntake;
