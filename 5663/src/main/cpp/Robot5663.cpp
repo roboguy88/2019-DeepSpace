@@ -43,6 +43,7 @@ void Robot::RobotInit() {
 
   DrivetrainConfig drivetrainConfig{*Left, *Right};
   drivetrain = new Drivetrain(drivetrainConfig);
+  drivetrain->StartLoop(100);
   
   xbox1 = new frc::XboxController(0);
   xbox2 = new frc::XboxController(1);
@@ -54,8 +55,11 @@ void Robot::RobotInit() {
   //Servo *AntiFlooperFlooper = new Servo(1);
 
   //NetworkTable
-  visionTable = nt::NetworkTableInstance::GetDefault().GetTable("VisionTracking");
-  tapeTable = visionTable->GetTable("TapeTracking");
+  // Wait(1);
+  auto inst = nt::NetworkTableInstance::GetDefault();
+  // inst.StartServer();
+  visionTable = inst.GetTable("VisionTracking");
+  tapeTable = visionTable->GetSubTable("TapeTracking");
   targetAngle = tapeTable->GetEntry("Angle");
   targetDistance = tapeTable->GetEntry("Distance");
   targetOffset = tapeTable->GetEntry("Target");
@@ -90,25 +94,27 @@ void Robot::TeleopPeriodic() {
   //    driveFunct->TurnNinety();
   //  }
   frc::SmartDashboard::PutNumber("target distance", targetDistance.GetDouble(-1.0));
+  frc::SmartDashboard::PutNumber("target angle", targetAngle.GetDouble(-1.0));
+  frc::SmartDashboard::PutNumber("target offset", targetOffset.GetDouble(-1.0));
 
 
-  if (xbox1->GetBumper(hand::kRightHand)) {
+  if (xbox1->GetYButton()) {
     // pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
     // power = driveFunct->TurnAngle(180, dt, pressRBumper);
     // drivetrain->Set(power, power);
     // message = 76;
 
-    if (xbox1->GetBumperPressed(hand::kRightHand)) {
+    if (xbox1->GetYButtonPressed()) {
       stage = 0; //0 = find target, 1 = readjust position, 2 = align on target, 3 = charge target
       snapshots = 0;
     }
 
     if (stage == 0 && targetDistance.GetDouble(-1.0) > 0 && snapshots < 3) {
-      avgDistance += targetDistance.GetDouble;
-      avgAngle += targetAngle.GetDouble;
-      avgOffset += targetOffset.GetDouble;
+      avgDistance += targetDistance.GetDouble(-1.0);
+      avgAngle += targetAngle.GetDouble(0.0);
+      avgOffset += targetOffset.GetDouble(0.0);
       snapshots += 1;
-    } else if (stage = 0 && targetDistance.GetDouble > 0 && snapshots = 3) {
+    } else if (stage == 0 && targetDistance.GetDouble(-1.0) > 0 && snapshots == 3) {
       avgAngle /= 3;
       avgDistance /= 3;
       avgOffset /= 3;
@@ -122,17 +128,20 @@ void Robot::TeleopPeriodic() {
     }
 
     if (stage == 2 && abs(avgOffset) > 10) {
-      driveFunct->TurnAngle(avgOffset * 32/640, dt, snapshots == 0);
+      double visionPower = driveFunct->TurnAngle(avgOffset * 32/640, dt, snapshots == 0);
+      frc::SmartDashboard::PutNumber("angle", avgOffset * 32/640);
+
+      drivetrain->Set(-visionPower, -visionPower);
       snapshots++;
     } else if (abs(avgOffset) < 10) {
       stage = 3;
-      snapshots = 0;
+      //snapshots = 0;
     }
 
-    if (stage == 3) {
-      driveFunct->Forward(avgDistance, dt, snapshots == 0);
-      snapshots++;
-    }
+    // if (stage == 3) {
+    //   driveFunct->Forward(-avgDistance, dt, snapshots == 0);
+    //   snapshots++;
+    // }
 
   } else if (xbox1->GetBButton()) {
     pressBButton = xbox1->GetBButtonPressed();
@@ -149,6 +158,8 @@ void Robot::TeleopPeriodic() {
     double right_speed = xbox1->GetY(hand::kRightHand);
     drivetrain->Set(left_speed*std::abs(left_speed), right_speed*std::abs(right_speed));
   }
+
+  
   // Climb
   // if (xbox1->GetBumper(hand::kLeftHand)){
   //   BIGBOYS->Set(frc::DoubleSolenoid::kReverse);

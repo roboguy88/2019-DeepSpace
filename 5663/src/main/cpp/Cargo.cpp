@@ -14,7 +14,7 @@ Cargo::Cargo(int SrxID1, int SrxID2, int intakeID) {
         config.nominalOutputReverse = 0;
         config.peakOutputForward = 1;
         config.peakOutputReverse = -1;
-        config.motionCruiseVelocity = 60000;
+        config.motionCruiseVelocity = 80000;
         config.motionAcceleration = 8000;
 
         
@@ -30,7 +30,7 @@ Cargo::Cargo(int SrxID1, int SrxID2, int intakeID) {
         config.nominalOutputReverse = 0;
         config.peakOutputForward = 1;
         config.peakOutputReverse = -1;
-        config.motionCruiseVelocity = 60000;
+        config.motionCruiseVelocity = 80000;
         config.motionAcceleration = 8000;
 
         
