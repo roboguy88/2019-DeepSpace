@@ -68,5 +68,6 @@ class Robot : public frc::TimedRobot {
   std::shared_ptr<nt::NetworkTable> table;
   nt::NetworkTableEntry targetAngle, targetDistance, targetOffset;
   int stage;
+  int snapshots;
   float avgDistance, avgAngle, avgOffset;
 };
