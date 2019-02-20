@@ -90,13 +90,13 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("target distance", targetDistance.GetDouble(-1.0));
 
 
-  if (xbox1->GetBumper(hand::kRightHand)) {
+  if (xbox1->GetYButton()) {
     // pressRBumper = xbox1->GetBumperPressed(hand::kRightHand);
     // power = driveFunct->TurnAngle(180, dt, pressRBumper);
     // drivetrain->Set(power, power);
     // message = 76;
 
-    if (xbox1->GetBumperPressed(hand::kRightHand)) {
+    if (xbox1->GetYButtonPressed()) {
       stage = 0; //0 = find target, 1 = readjust position, 2 = align on target, 3 = charge target
       snapshots = 0;
     }

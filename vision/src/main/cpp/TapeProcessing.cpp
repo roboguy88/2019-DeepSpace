@@ -14,6 +14,8 @@
 #include <iostream>
 
 #include "networktables/NetworkTableInstance.h"
+#include "ntcore.h"
+#include "ntcore_cpp.h"
 
 #include <cameraserver/CameraServer.h>
 #include <cscore.h>
@@ -161,7 +163,7 @@ void TapeProcessing::Periodic() {
         cv::rectangle(_imgProcessedTrack, targets[i] + cv::Point2f(-6,-6), targets[i] + cv::Point2f(6,6), green, 2); //draw small rectangle on target locations
         TapeDistanceEntry.SetDouble(distances[i]);
         TapeAngleEntry.SetDouble(angles[i]);
-        TapeTargetEntry.SetDouble(targets[i].x);
+        TapeTargetEntry.SetDouble(targets[i].x - 320);
       } else {
         cv::rectangle(_imgProcessedTrack, targets[i] + cv::Point2f(-6,-6), targets[i] + cv::Point2f(6,6), blue, 2); //draw small rectangle on target locations
       }
