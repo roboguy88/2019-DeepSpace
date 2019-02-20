@@ -105,7 +105,7 @@ void Robot::TeleopPeriodic() {
     // message = 76;
 
     if (xbox1->GetYButtonPressed()) {
-      stage = 0; //0 = find target, 1 = readjust position, 2 = align on target, 3 = charge target
+      stage = 0; //0 = find target, 1 = readjust position, 2 = align on target, 3 = charge target, 4 = eject
       snapshots = 0;
     }
 
@@ -121,6 +121,7 @@ void Robot::TeleopPeriodic() {
 
       if (abs(avgAngle) < 25) {
         stage = 2;
+        snapshots = 0;
       } else {
         stage = 1;
         snapshots = 0;
@@ -136,10 +137,26 @@ void Robot::TeleopPeriodic() {
       //snapshots = 0;
     }
 
-    // if (stage == 3) {
-    //   driveFunct->Forward(-avgDistance, dt, snapshots == 0);
-    //   snapshots++;
-    // }
+    /*
+    if (stage == 3) {
+      double visionPower = driveFunct->Forward(avgDistance, dt, snapshots == 0);
+      snapshots++;
+      if (visionPower > 0) {
+        drivetrain->Set(visionPower, -visionPower); //check the robot direction, this could go backwards
+      } else {
+        stage = 4;
+        snapshots = 0;
+      }
+    }
+    */
+
+    /*
+    if (stage == 4 && snapshots < 10) {
+      hatch->ejectHatch(true);
+    } else if (stage == 4 && snapshots == 10) {
+      hatch->ejectHatch(false);
+    }
+    */
 
   } else if (xbox1->GetBButton()) {
     pressBButton = xbox1->GetBButtonPressed();
