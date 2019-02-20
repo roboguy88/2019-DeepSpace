@@ -14,8 +14,8 @@ Cargo::Cargo(int SrxID1, int SrxID2, int intakeID) {
         config.nominalOutputReverse = 0;
         config.peakOutputForward = 1;
         config.peakOutputReverse = -1;
-        config.motionCruiseVelocity = 20000;
-        config.motionAcceleration = 5000;
+        config.motionCruiseVelocity = 80000;
+        config.motionAcceleration = 8000;
 
         
     });
@@ -30,8 +30,8 @@ Cargo::Cargo(int SrxID1, int SrxID2, int intakeID) {
         config.nominalOutputReverse = 0;
         config.peakOutputForward = 1;
         config.peakOutputReverse = -1;
-        config.motionCruiseVelocity = 20000;
-        config.motionAcceleration = 5000;
+        config.motionCruiseVelocity = 80000;
+        config.motionAcceleration = 8000;
 
         
     });
@@ -41,14 +41,14 @@ Cargo::Cargo(int SrxID1, int SrxID2, int intakeID) {
 
 void Cargo::setRotationSpeed(double speed) { //Percent speed
     if(std::abs(speed) < deadzone) speed = 0;
-    motorSrx1->Set(speed);
+    motorSrx1->Set(-speed);
     motorSrx2->Set(speed);
     }
 
 
 void Cargo::setAngle(double newAngle) { //Set intake to a specific angle
     motorSrx1->Set(curtinfrc::TalonSrx::ControlMode::MotionMagic, newAngle);
-    motorSrx2->Set(curtinfrc::TalonSrx::ControlMode::MotionMagic, newAngle);
+    motorSrx2->Set(curtinfrc::TalonSrx::ControlMode::MotionMagic, -newAngle);
 }
 
 
